@@ -126,6 +126,12 @@ public class HospitalServiceImpl implements HospitalService {
         return result;
     }
 
+    //2、医院名称模糊查询
+    @Override
+    public List<Hospital> getHospLike(String hosname) {
+        return hospitalRepository.findHospitalByHosnameLike(hosname);
+    }
+
 
     //获取每个对象编号，远程调用根据编号获取名称，把获取名称封装hospital对象的map中
     private Hospital packHospital(Hospital hospital) {
