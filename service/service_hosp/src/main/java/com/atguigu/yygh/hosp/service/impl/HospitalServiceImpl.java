@@ -5,14 +5,20 @@ import com.atguigu.yygh.cmn.client.DictFeignClient;
 import com.atguigu.yygh.common.result.R;
 import com.atguigu.yygh.enums.DictEnum;
 import com.atguigu.yygh.hosp.repository.HospitalRepository;
+import com.atguigu.yygh.hosp.service.DepartmentService;
 import com.atguigu.yygh.hosp.service.HospitalService;
 import com.atguigu.yygh.model.hosp.Hospital;
+import com.atguigu.yygh.vo.hosp.DepartmentVo;
 import com.atguigu.yygh.vo.hosp.HospitalQueryVo;
 import com.sun.xml.internal.bind.v2.TODO;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -28,6 +34,7 @@ public class HospitalServiceImpl implements HospitalService {
     //远程调用使用
     @Autowired
     private DictFeignClient dictFeignClient;
+
 
     //添加医院方法
     @Override
@@ -130,6 +137,19 @@ public class HospitalServiceImpl implements HospitalService {
     @Override
     public List<Hospital> getHospLike(String hosname) {
         return hospitalRepository.findHospitalByHosnameLike(hosname);
+    }
+
+    //4、根据医院编号获取医院详情
+    @Override
+    public Map<String, Object> selctHospByHoscode(String hoscode) {
+        Map<String, Object> result = new HashMap<>();
+        Hospital hosp = this.getHosp(hoscode);
+        //医院详情
+        Hospital hospital = this.packHospital(hosp);
+        result.put("hospital", hospital);
+        //预约规则
+        result.put("bookingRule", hospital.getBookingRule());
+        return result;
     }
 
 

@@ -19,4 +19,7 @@ public interface UserInfoService extends IService<UserInfo> {
 
     //登录接口+手机验证码
     Map<String, Object> loginUser(LoginVo loginVo);
+
+    // 根据微信的openid查询
+    UserInfo getWxInfoByOpenid(String openid);
 }

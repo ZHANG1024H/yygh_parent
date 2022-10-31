@@ -25,4 +25,10 @@ public interface HospitalService {
 
     //2、医院名称模糊查询
     List<Hospital> getHospLike(String hosname);
+
+    //4、根据医院编号获取医院详情
+    Map<String, Object> selctHospByHoscode(String hoscode);
+
+
+
 }

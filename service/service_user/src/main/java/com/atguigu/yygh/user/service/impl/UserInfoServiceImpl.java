@@ -7,8 +7,11 @@ import com.atguigu.yygh.model.user.UserInfo;
 import com.atguigu.yygh.user.mapper.UserInfoMapper;
 import com.atguigu.yygh.user.service.UserInfoService;
 import com.atguigu.yygh.vo.user.LoginVo;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -26,6 +29,9 @@ import java.util.Map;
 @Service
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements UserInfoService {
 
+    @Autowired
+    private RedisTemplate<String,String> redisTemplate;
+
     //登录接口+手机验证码
     @Override
     public Map<String, Object> loginUser(LoginVo loginVo) {
@@ -37,8 +43,12 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         if (StringUtils.isEmpty(phone) || StringUtils.isEmpty(code)){
             throw new YyghException(20001,"数据为空");
         }
-        //TODO 3、验证码校验过程
+        //3、验证码校验过程
         // 输入验证码和redis验证码比对
+        String redisCode = redisTemplate.opsForValue().get(phone);
+        if (!code.equals(redisCode)){
+            throw new YyghException(20001,"验证码校验失败");
+        }
 
         //4、判断手机号是否第一次登录，根据手机号查询数据库
         QueryWrapper<UserInfo> wrapper = new QueryWrapper<>();
@@ -75,6 +85,18 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
         return map;
     }
+
+    // 根据微信的openid查询数据
+    @Override
+    public UserInfo getWxInfoByOpenid(String openid) {
+        LambdaQueryWrapper<UserInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserInfo::getOpenid,openid);
+        //调用方法查询
+        UserInfo userInfo = baseMapper.selectOne(wrapper);
+        return userInfo;
+    }
+
+
 }
 
 

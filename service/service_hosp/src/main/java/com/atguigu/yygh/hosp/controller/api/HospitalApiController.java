@@ -8,6 +8,7 @@ import com.atguigu.yygh.vo.hosp.DepartmentVo;
 import com.atguigu.yygh.vo.hosp.HospitalQueryVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @Api(tags = "医院显示接口")
 @RestController
@@ -24,6 +26,7 @@ public class HospitalApiController {
 
     @Autowired
     private HospitalService hospitalService;
+
 
     //1、条件查询医院列表
     @ApiOperation(value = "获取分页列表")
@@ -36,7 +39,7 @@ public class HospitalApiController {
         return R.ok().data("pages",hospModel);
     }
 
-    //获取科室列表
+    //3、获取科室列表
     @Autowired
     private DepartmentService departmentService;
     @ApiOperation(value = "获取科室列表")
@@ -52,5 +55,14 @@ public class HospitalApiController {
     public R findByHosname(@PathVariable String hosname) {
         List<Hospital> list = hospitalService.getHospLike(hosname);
         return R.ok().data("list",list);
+    }
+
+    //4、根据医院编号获取医院详情
+    @ApiOperation(value = "医院预约挂号详情")
+    @GetMapping("{hoscode}")
+    public R item(
+            @PathVariable String hoscode) {
+        Map<String, Object> map = hospitalService.selctHospByHoscode(hoscode);
+        return R.ok().data(map);
     }
 }
