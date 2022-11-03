@@ -19,4 +19,7 @@ public interface DepartmentService {
 
     //查询所有科室列表（大科室，小科室）
     List<DepartmentVo> findDeptTree(String hoscode);
+
+    //科室
+    Department getDepartment(String hoscode, String depcode);
 }

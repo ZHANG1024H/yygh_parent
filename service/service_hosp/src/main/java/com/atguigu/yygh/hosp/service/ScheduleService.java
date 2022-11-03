@@ -21,4 +21,11 @@ public interface ScheduleService {
 
     //根据医院编号+科室编号+工作日期，查询科室中医生排班详细信息
     List<Schedule> getScheduleDataDetail(String hoscode, String depcode, String workDate);
+
+    //显示科室可以预约日期数据
+    //医院编号+科室编号+分页参数
+    Map<String, Object> getBookingScheduleRule(Integer page, Integer limit, String hoscode, String depcode);
+
+    ////6、根据排班id获取排班的详情数据
+    Schedule getScheduleId(String id);
 }

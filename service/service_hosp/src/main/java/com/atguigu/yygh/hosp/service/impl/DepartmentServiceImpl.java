@@ -142,4 +142,11 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
         return finalDeptList;
     }
+
+    //科室
+    @Override
+    public Department getDepartment(String hoscode, String depcode) {
+        Department dept = departmentRepository.getDeptByHoscodeAndDepcode(hoscode, depcode);
+        return dept;
+    }
 }
