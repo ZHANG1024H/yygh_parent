@@ -70,5 +70,13 @@ public class PatientController {
         Patient patient = patientService.getPatientId(id);
         return R.ok().data("patient",patient);
     }
+
+    //6、远程调用生成订单
+    //根据就诊人id返回就诊人信息
+    @GetMapping("inner/get/{id}")
+    public Patient getPatierntOrders(@PathVariable Long id){
+        Patient patient = patientService.getPatientId(id);
+        return patient;
+    }
 }
 

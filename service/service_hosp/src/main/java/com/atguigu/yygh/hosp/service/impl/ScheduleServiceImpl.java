@@ -1,6 +1,7 @@
 package com.atguigu.yygh.hosp.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.atguigu.yygh.common.exception.YyghException;
 import com.atguigu.yygh.hosp.repository.ScheduleRepository;
 import com.atguigu.yygh.hosp.service.DepartmentService;
 import com.atguigu.yygh.hosp.service.HospitalService;
@@ -10,6 +11,7 @@ import com.atguigu.yygh.model.hosp.Department;
 import com.atguigu.yygh.model.hosp.Hospital;
 import com.atguigu.yygh.model.hosp.Schedule;
 import com.atguigu.yygh.vo.hosp.BookingScheduleRuleVo;
+import com.atguigu.yygh.vo.hosp.ScheduleOrderVo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
@@ -399,6 +401,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         Schedule schedule = this.packageSchedule(scheduleRepository.findById(id).get());
         return schedule;
     }
+
     //6.1 获取医院名称和科室名称
     private Schedule packageSchedule(Schedule schedule) {
         String hoscode = schedule.getHoscode();
@@ -413,6 +416,61 @@ public class ScheduleServiceImpl implements ScheduleService {
         return schedule;
     }
 
+    //7、order远程调用使用--生成订单使用，根据排班id获取预约下单数据
+    @Override
+    public ScheduleOrderVo getScheduleOrderVo(String scheduleId) {
+        //创建vo对象，用于最终封装
+        ScheduleOrderVo scheduleOrderVo = new ScheduleOrderVo();
+        //调用方法根据排班id获取排班信息
+        Schedule schedule = this.getScheduleId(scheduleId);
+        //非空判断
+        if(null == schedule) {
+            throw new YyghException(20001,"排班数据为空！！！");
+        }
+        //获取医院基本信息
+        Hospital hospital = hospitalService.getHosp(schedule.getHoscode());
+        //非空判断
+        if(null == hospital) {
+            throw new YyghException();
+        }
+        //获取预约规则信息
+        BookingRule bookingRule = hospital.getBookingRule();
+        if(null == bookingRule) {
+            throw new YyghException();
+        }
+        //封装数据到vo对象中
+        scheduleOrderVo.setHoscode(schedule.getHoscode());//医院编号
+        scheduleOrderVo.setHosname(hospital.getHosname());//医院名称
+        scheduleOrderVo.setDepcode(schedule.getDepcode());//科室编号
+        scheduleOrderVo.setDepname(departmentService.getDepartment(schedule.getHoscode(), schedule.getDepcode()).getDepname());
+        scheduleOrderVo.setHosScheduleId(schedule.getHosScheduleId());
+        scheduleOrderVo.setAvailableNumber(schedule.getAvailableNumber());
+        scheduleOrderVo.setTitle(schedule.getTitle());
+        scheduleOrderVo.setReserveDate(schedule.getWorkDate());
+        scheduleOrderVo.setReserveTime(schedule.getWorkTime());
+        scheduleOrderVo.setAmount(schedule.getAmount());
+        //退号截止天数（如：就诊前一天为-1，当天为0）
+        int quitDay = bookingRule.getQuitDay();
+        DateTime quitTime = this.getDateTime(new DateTime(schedule.getWorkDate()).plusDays(quitDay).toDate(), bookingRule.getQuitTime());
+        scheduleOrderVo.setQuitTime(quitTime.toDate());
+        //预约开始时间
+        DateTime startTime = this.getDateTime(new Date(), bookingRule.getReleaseTime());
+        scheduleOrderVo.setStartTime(startTime.toDate());
+        //预约截止时间
+        DateTime endTime = this.getDateTime(new DateTime().plusDays(bookingRule.getCycle()).toDate(), bookingRule.getStopTime());
+        scheduleOrderVo.setEndTime(endTime.toDate());
+        //当天停止挂号时间
+        DateTime stopTime = this.getDateTime(new Date(), bookingRule.getStopTime());
+        scheduleOrderVo.setStopTime(stopTime.toDate());
+        return scheduleOrderVo;
+    }
+
+    //8、调用service方法更新排班号数量
+    @Override
+    public void updateSchedule(Schedule schedule) {
+        //主键一致就是更新
+        scheduleRepository.save(schedule);
+    }
 }
 
 
