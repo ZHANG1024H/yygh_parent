@@ -16,6 +16,8 @@ import com.atguigu.yygh.rabbit.constant.MqConst;
 import com.atguigu.yygh.user.client.PatientFeignClient;
 import com.atguigu.yygh.vo.hosp.ScheduleOrderVo;
 import com.atguigu.yygh.vo.msm.MsmVo;
+import com.atguigu.yygh.vo.order.OrderCountQueryVo;
+import com.atguigu.yygh.vo.order.OrderCountVo;
 import com.atguigu.yygh.vo.order.OrderMqVo;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -29,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -247,5 +250,23 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             //发送mq
             rabbitService.sendMessage(MqConst.EXCHANGE_DIRECT_MSM, MqConst.ROUTING_MSM_ITEM, msmVo);
         }
+    }
+
+    //4、查询统计数据
+    @Override
+    public Map<String, Object> getCountMap(OrderCountQueryVo orderCountQueryVo) {
+        //调用mapper方法得到查询统计数据
+        List<OrderCountVo> orderCountList = baseMapper.selectOrderCount(orderCountQueryVo);
+        //根据echarts要求数据格式返回
+        //因为echarts要求返回两部分数据
+        //从orderCountList集合获取所有日期对应数据，把所有数据封装list集合
+        List<String> dateList = orderCountList.stream().map(OrderCountVo::getReserveDate).collect(Collectors.toList());
+        List<Integer> countList = orderCountList.stream().map(OrderCountVo::getCount).collect(Collectors.toList());
+
+        //封装到map
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("dateList",dateList);
+        map.put("countList",countList);
+        return map;
     }
 }

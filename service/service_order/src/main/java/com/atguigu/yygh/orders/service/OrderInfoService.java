@@ -2,7 +2,10 @@ package com.atguigu.yygh.orders.service;
 
 
 import com.atguigu.yygh.model.order.OrderInfo;
+import com.atguigu.yygh.vo.order.OrderCountQueryVo;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.Map;
 
 /**
  * <p>
@@ -25,4 +28,7 @@ public interface OrderInfoService extends IService<OrderInfo> {
 
     //4、就医提醒
     void tips(String dateString);
+
+    //4、查询统计数据
+    Map<String, Object> getCountMap(OrderCountQueryVo orderCountQueryVo);
 }

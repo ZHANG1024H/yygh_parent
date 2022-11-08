@@ -4,10 +4,13 @@ package com.atguigu.yygh.orders.controller;
 import com.atguigu.yygh.common.result.R;
 import com.atguigu.yygh.model.order.OrderInfo;
 import com.atguigu.yygh.orders.service.OrderInfoService;
+import com.atguigu.yygh.vo.order.OrderCountQueryVo;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * <p>
@@ -53,6 +56,15 @@ public class OrderInfoController {
             @PathVariable("orderId") Long orderId) {
         boolean flag = orderInfoService.cancelOrder(orderId);
         return R.ok().data("flag",flag);
+    }
+
+    //4、查询统计数据
+    //条件：医院名称，时间范围
+    @ApiOperation(value = "获取订单统计数据")
+    @PostMapping("inner/getCountMap")
+    public R getCount(@RequestBody OrderCountQueryVo orderCountQueryVo){
+        Map<String,Object> map = orderInfoService.getCountMap(orderCountQueryVo);
+        return R.ok().data(map);
     }
 }
 
